@@ -1,6 +1,7 @@
 using CleanArchitecture.Application.Behaviors;
 using CleanArchitecture.Application.Services;
 using CleanArchitecture.Domain.Entities;
+using CleanArchitecture.Infrastructure.Services;
 using CleanArchitecture.Persistance.Context;
 using CleanArchitecture.Persistance.Services;
 using CleanArchitecture.WebApi.Middleware;
@@ -14,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddTransient<ExceptionMiddleware>();//Middlewarei çalýþtýrmak için gerekli
+builder.Services.AddScoped<IMailService, MailService>();
 
 builder.Services.AddAutoMapper(typeof(CleanArchitecture.Persistance.AssemblyReference).Assembly);//Automapper persistance katmanýndaki
                                                                                                  //otomatik kendi yapýsýný bulacak

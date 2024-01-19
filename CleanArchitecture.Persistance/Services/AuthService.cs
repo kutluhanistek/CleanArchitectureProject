@@ -15,11 +15,13 @@ namespace CleanArchitecture.Persistance.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
+        private readonly IMailService _mailService;
 
-        public AuthService(UserManager<User> userManager, IMapper mapper)
+        public AuthService(UserManager<User> userManager, IMapper mapper, IMailService mailService)
         {
             _userManager = userManager;
             _mapper = mapper;
+            _mailService = mailService;
         }
 
         public async Task RegisterAsync(RegisterCommand request)
@@ -30,6 +32,11 @@ namespace CleanArchitecture.Persistance.Services
             {
                 throw new Exception(result.Errors.First().Description);
             }
+
+            List<string> emails = new();
+            emails.Add(request.Email);
+            string body = "";
+            await _mailService.SendMailAsync(emails, "Mail Onayı", body);
         }
     }
 }
