@@ -5,6 +5,7 @@ using CleanArchitecture.Infrastructure.Services;
 using CleanArchitecture.Persistance.Context;
 using CleanArchitecture.Persistance.Services;
 using CleanArchitecture.WebApi.Middleware;
+using CleanArchitecture.WebApi.OptionsSetup;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +17,13 @@ builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddTransient<ExceptionMiddleware>();//Middlewarei çalýþtýrmak için gerekli
 builder.Services.AddScoped<IMailService, MailService>();
+
+
+builder.Services.ConfigureOptions<JwtOptionsSetup>();
+builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
+
+builder.Services.AddAuthentication().AddJwtBearer();
+
 
 builder.Services.AddAutoMapper(typeof(CleanArchitecture.Persistance.AssemblyReference).Assembly);//Automapper persistance katmanýndaki
                                                                                                  //otomatik kendi yapýsýný bulacak
