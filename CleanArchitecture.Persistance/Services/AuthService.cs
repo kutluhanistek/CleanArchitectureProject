@@ -1,42 +1,61 @@
 ﻿using AutoMapper;
+using CleanArchitecture.Application.Abstractions;
+using CleanArchitecture.Application.Features.AuthFeatures.Commands.Login;
 using CleanArchitecture.Application.Features.AuthFeatures.Commands.Register;
 using CleanArchitecture.Application.Services;
 using CleanArchitecture.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-namespace CleanArchitecture.Persistance.Services
+namespace CleanArchitecture.Persistance.Services;
+
+public sealed class AuthService : IAuthService
 {
-    public sealed class AuthService : IAuthService
+    private readonly UserManager<User> _userManager;
+    private readonly IMapper _mapper;
+    private readonly IMailService _mailService;
+    private readonly IJwtProvider _jwtProvider;
+
+    public AuthService(UserManager<User> userManager, IMapper mapper, IMailService mailService, IJwtProvider jwtProvider)
     {
-        private readonly UserManager<User> _userManager;
-        private readonly IMapper _mapper;
-        private readonly IMailService _mailService;
+        _userManager = userManager;
+        _mapper = mapper;
+        _mailService = mailService;
+        _jwtProvider = jwtProvider;
+    }
 
-        public AuthService(UserManager<User> userManager, IMapper mapper, IMailService mailService)
+    public async Task<LoginCommandResponse> LoginAsync(LoginCommand request, CancellationToken cancellationToken)
+    {
+        User? user = await _userManager.Users.Where(p =>
+        p.UserName == request.UserNameorEmail || p.Email == request.UserNameorEmail)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (user == null)
         {
-            _userManager = userManager;
-            _mapper = mapper;
-            _mailService = mailService;
+            throw new Exception("Kullanıcı Bulunamadı");
         }
 
-        public async Task RegisterAsync(RegisterCommand request)
+        var result = await _userManager.CheckPasswordAsync(user, request.Password);
+        if (result)
         {
-            User user = _mapper.Map<User>(request);
-            IdentityResult result = await _userManager.CreateAsync(user, request.Password);
-            if(!result.Succeeded)
-            {
-                throw new Exception(result.Errors.First().Description);
-            }
-
-            List<string> emails = new();
-            emails.Add(request.Email);
-            string body = "";
-            await _mailService.SendMailAsync(emails, "Mail Onayı", body);
+            LoginCommandResponse response = await _jwtProvider.CreateTokenAsync(user);
+            return response;
         }
+
+        throw new Exception("Şifreyi yanlış girdiniz");
+    }
+
+    public async Task RegisterAsync(RegisterCommand request)
+    {
+        User user = _mapper.Map<User>(request);
+        IdentityResult result = await _userManager.CreateAsync(user, request.Password);
+        if(!result.Succeeded)
+        {
+            throw new Exception(result.Errors.First().Description);
+        }
+
+        List<string> emails = new();
+        emails.Add(request.Email);
+        string body = "";
+        await _mailService.SendMailAsync(emails, "Mail Onayı", body);
     }
 }
