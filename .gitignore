@@ -364,3 +364,11 @@ MigrationBackup/
 FodyWeavers.xsd
 /CleanArchitecture.WebApi/appsettings.json
 /CleanArchitecture.WebApi/appsettings.json
+/CleanArchitecture.Persistance/Migrations/20240121135501_mg5.cs
+/CleanArchitecture.Persistance/Migrations/20240115151010_mg4.cs
+/CleanArchitecture.Persistance/Migrations/20240115125516_mg3.cs
+/CleanArchitecture.Persistance/Migrations/20240114134327_mg2.cs
+/CleanArchitecture.Persistance/Migrations/20240107151449_mg1.cs
+/CleanArchitecture.Persistance/Migrations/20240121135501_mg5.cs
+/CleanArchitecture.Persistance/Migrations/AppDbContextModelSnapshot.cs
+/CleanArchitecture.Persistance/Migrations/20240121135501_mg5.Designer.cs
