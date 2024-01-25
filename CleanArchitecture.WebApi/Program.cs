@@ -69,7 +69,6 @@ app.UseMiddlewareExtensions();//Middleware çalýþtýrmak için gerekli
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
 
 app.MapControllers();
 
