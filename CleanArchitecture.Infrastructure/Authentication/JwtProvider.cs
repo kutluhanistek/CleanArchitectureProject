@@ -37,8 +37,8 @@ namespace CleanArchitecture.Infrastructure.Authentication
 
             DateTime expires = DateTime.Now.AddHours(1);
             JwtSecurityToken jwtSecurityToken = new(
-                issuer: "",
-                audience: "",
+                issuer: _jwtOptions.Issuer,
+                audience: _jwtOptions.Audience,
                 claims: claims,
                 notBefore: DateTime.Now,//tokenın ne zaman oluşacağını belirliyor
                 expires: expires,//tokenın ne kadar süre geçerli olduğunu belirliyor

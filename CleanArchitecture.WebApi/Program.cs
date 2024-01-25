@@ -10,8 +10,10 @@ using CleanArchitecture.WebApi.Middleware;
 using CleanArchitecture.WebApi.OptionsSetup;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +26,8 @@ builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.ConfigureOptions<JwtOptionsSetup>();
 builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
 
-builder.Services.AddAuthentication().AddJwtBearer();
+builder.Services.AddAuthentication().AddJwtBearer();// Token için ekledim
+builder.Services.AddAuthorization();// Authorization için ekledim.
 
 
 builder.Services.AddAutoMapper(typeof(CleanArchitecture.Persistance.AssemblyReference).Assembly);//Automapper persistance katmanýndaki
@@ -54,7 +57,31 @@ builder.Services.AddValidatorsFromAssembly(typeof
     (CleanArchitecture.Application.AssemblyReference).Assembly);//validator için application katmanýnýn assembly referansýný verdik
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(setup =>
+{
+    var jwtSecuritySheme = new OpenApiSecurityScheme
+    {
+        BearerFormat = "JWT",
+        Name = "JWT Authentication",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        Description = "Put **_ONLY_** yourt JWT Bearer token on textbox below!",
+
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    setup.AddSecurityDefinition(jwtSecuritySheme.Reference.Id, jwtSecuritySheme);
+
+    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { jwtSecuritySheme, Array.Empty<string>() }
+                });
+});
 
 var app = builder.Build();
 
@@ -68,7 +95,6 @@ if (app.Environment.IsDevelopment())
 app.UseMiddlewareExtensions();//Middleware çalýþtýrmak için gerekli
 
 app.UseHttpsRedirection();
-
 
 app.MapControllers();
 
